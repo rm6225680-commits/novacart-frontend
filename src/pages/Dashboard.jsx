@@ -63,7 +63,16 @@ export default function Dashboard() {
     setLoadingReply(true);
     try {
       const res = await API.post(`/tickets/${ticketId}/ai/reply`);
-      setSuggestedReply(res.data.reply || res.data);
+      
+      // Safely extract text whether backend returns a string or an object with suggestedReply/reply keys
+      let text = "";
+      if (typeof res.data === 'string') {
+        text = res.data;
+      } else if (res.data) {
+        text = res.data.suggestedReply || res.data.reply || res.data.content || res.data.message || res.data.analysis || JSON.stringify(res.data);
+      }
+      
+      setSuggestedReply(text);
     } catch (err) {
       setSuggestedReply("We apologize for the inconvenience. Based on NovaCart policy, your request is being processed.");
     } finally {
